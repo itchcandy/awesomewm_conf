@@ -2,6 +2,7 @@
 -- found (e.g. lgi). If LuaRocks is not installed, do nothing.
 pcall(require, "luarocks.loader")
 
+local theme = "custom"
 -- Standard awesome library
 local gears = require("gears")
 local awful = require("awful")
@@ -14,6 +15,7 @@ local beautiful = require("beautiful")
 local naughty = require("naughty")
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup")
+local vicious = require("vicious")
 -- Enable hotkeys help widget for VIM and other apps
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
@@ -45,8 +47,8 @@ end
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
-beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
--- beautiful.init("themes.default.theme.lua")
+-- beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
+beautiful.init(awful.util.get_configuration_dir() .. "themes/" .. theme .. "/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
 terminal = os.getenv("TERMINAL") or "kitty"
@@ -102,12 +104,45 @@ mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
 -- }}}
 
--- Keyboard map indicator and switcher
-mykeyboardlayout = awful.widget.keyboardlayout()
-
 -- {{{ Wibar
 -- Create a textclock widget
-mytextclock = wibox.widget.textclock()
+mytextclock = wibox.widget.textclock("%H:%M", 60)
+
+
+-- battery
+batwidget = wibox.widget.progressbar()
+batbox = wibox.layout.margin(
+    wibox.widget {{
+            max_value = 1,
+            widget = batwidget,
+            border_width = 1,
+            border_color = "#000000",
+            color = {
+                type = "linear",
+                from = {0, 0},
+                to = {0, 30},
+                stops = {{0, "#AECF96"}, {1, "#FF5656"}}
+            }
+        },
+        forced_height = 10,
+        forced_width = 8,
+        direction = 'east',
+        color = beautiful.fg_widget,
+        layout = wibox.container.rotate
+    },
+    1, 1, 3, 3
+)
+
+-- cpu
+cpuwidget = awful.widget.graph()
+cpuwidget:set_width(30)
+cpuwidget:set_background_color"#494B4F"
+cpuwidget:set_color {
+    type = "linear",
+    from = {0, 0},
+    to = {50, 0},
+    stops = {{0, "#FF5656"}, {0.5, "#88A175"}, {1, "#AECF96"}}
+}
 
 -- Create a wibox for each screen and add it
 local taglist_buttons = gears.table.join(
@@ -210,8 +245,10 @@ awful.screen.connect_for_each_screen(function(s)
         s.mytasklist, -- Middle widget
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
-            mykeyboardlayout,
+            -- mykeyboardlayout,
             wibox.widget.systray(),
+            cpuwidget,
+            batbox,
             mytextclock,
             s.mylayoutbox,
         },
@@ -561,4 +598,6 @@ end)
 
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
+vicious.register(batwidget, vicious.widgets.bat, "$2", 61, "BAT0")
+vicious.register(cpuwidget, vicious.widgets.cpu, "$1", 3)
 -- }}}
