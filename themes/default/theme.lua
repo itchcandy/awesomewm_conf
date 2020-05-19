@@ -5,16 +5,18 @@
 local theme_assets = require("beautiful.theme_assets")
 local xresources = require("beautiful.xresources")
 local dpi = xresources.apply_dpi
+local wall_image = "~/pix/mikael.png"
+local awful = require("awful")
 
 local gfs = require("gears.filesystem")
 local themes_path = gfs.get_themes_dir()
 
 local theme = {}
 
-theme.font          = "sans 8"
+theme.font          = "sans 10"
 
 theme.bg_normal     = "#222222"
-theme.bg_focus      = "#535d6c"
+theme.bg_focus      = "#000000"
 theme.bg_urgent     = "#ff0000"
 theme.bg_minimize   = "#444444"
 theme.bg_systray    = theme.bg_normal
@@ -27,7 +29,7 @@ theme.fg_minimize   = "#ffffff"
 theme.useless_gap   = dpi(0)
 theme.border_width  = dpi(1)
 theme.border_normal = "#000000"
-theme.border_focus  = "#535d6c"
+theme.border_focus  = "#000000"
 theme.border_marked = "#91231c"
 
 -- There are other variable sets
@@ -97,7 +99,8 @@ theme.titlebar_maximized_button_focus_inactive  = themes_path.."default/titlebar
 theme.titlebar_maximized_button_normal_active = themes_path.."default/titlebar/maximized_normal_active.png"
 theme.titlebar_maximized_button_focus_active  = themes_path.."default/titlebar/maximized_focus_active.png"
 
-theme.wallpaper = themes_path.."default/background.png"
+-- theme.wallpaper = themes_path.."default/background.png"
+theme.wallpaper = wall_image
 
 -- You can use your own layout icons like this:
 theme.layout_fairh = themes_path.."default/layouts/fairhw.png"
@@ -116,6 +119,17 @@ theme.layout_cornernw = themes_path.."default/layouts/cornernww.png"
 theme.layout_cornerne = themes_path.."default/layouts/cornernew.png"
 theme.layout_cornersw = themes_path.."default/layouts/cornersww.png"
 theme.layout_cornerse = themes_path.."default/layouts/cornersew.png"
+
+-- widgets
+theme.widget_wifi = awful.util.getdir("config") .. "/themes/default/widgets/wifi.png"
+theme.widget_nowifi = awful.util.getdir("config") .. "/themes/default/widgets/nowifi.png"
+theme.widget_ac = awful.util.getdir("config") .. "/themes/default/widgets/ac.png"
+theme.widget_acblink = awful.util.getdir("config") .. "/themes/default/widgets/acblink.png"
+theme.widget_blank = awful.util.getdir("config") .. "/themes/default/widgets/blank.png"
+theme.widget_batfull = awful.util.getdir("config") .. "/themes/default/widgets/batfull.png"
+theme.widget_batmed = awful.util.getdir("config") .. "/themes/default/widgets/batmed.png"
+theme.widget_batlow = awful.util.getdir("config") .. "/themes/default/widgets/batlow.png"
+theme.widget_batempty = awful.util.getdir("config") .. "/themes/default/widgets/batempty.png"
 
 -- Generate Awesome icon:
 theme.awesome_icon = theme_assets.awesome_icon(

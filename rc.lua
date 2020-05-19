@@ -2,7 +2,7 @@
 -- found (e.g. lgi). If LuaRocks is not installed, do nothing.
 pcall(require, "luarocks.loader")
 
-local theme = "custom"
+local theme = "default"
 -- Standard awesome library
 local gears = require("gears")
 local awful = require("awful")
@@ -19,6 +19,7 @@ local vicious = require("vicious")
 -- Enable hotkeys help widget for VIM and other apps
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
+local wi = require("wi")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -47,7 +48,6 @@ end
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
--- beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
 beautiful.init(awful.util.get_configuration_dir() .. "themes/" .. theme .. "/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
@@ -60,22 +60,23 @@ editor_cmd = terminal .. " -e " .. editor
 -- If you do not like this or do not have such a key,
 -- I suggest you to remap Mod4 to another key using xmodmap or other tools.
 modkey = "Mod4"
+lock = function() awful.util.spawn("slock") end
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 awful.layout.layouts = {
-    awful.layout.suit.floating,
-    awful.layout.suit.tile,
-    awful.layout.suit.tile.left,
-    awful.layout.suit.tile.bottom,
-    awful.layout.suit.tile.top,
-    awful.layout.suit.fair,
-    awful.layout.suit.fair.horizontal,
-    awful.layout.suit.spiral,
-    awful.layout.suit.spiral.dwindle,
     awful.layout.suit.max,
-    awful.layout.suit.max.fullscreen,
-    awful.layout.suit.magnifier,
+    awful.layout.suit.floating,
     awful.layout.suit.corner.nw,
+    awful.layout.suit.fair,
+    awful.layout.suit.max.fullscreen,
+    -- awful.layout.suit.tile.left,
+    -- awful.layout.suit.tile.top,
+    -- awful.layout.suit.spiral.dwindle,
+    -- awful.layout.suit.tile,
+    -- awful.layout.suit.fair.horizontal,
+    -- awful.layout.suit.tile.bottom,
+    -- awful.layout.suit.magnifier,
+    -- awful.layout.suit.spiral,
     -- awful.layout.suit.corner.ne,
     -- awful.layout.suit.corner.sw,
     -- awful.layout.suit.corner.se,
@@ -85,6 +86,7 @@ awful.layout.layouts = {
 -- {{{ Menu
 -- Create a launcher widget and a main menu
 myawesomemenu = {
+   { "lock", lock },
    { "hotkeys", function() hotkeys_popup.show_help(nil, awful.screen.focused()) end },
    { "manual", terminal .. " -e man awesome" },
    { "edit config", editor_cmd .. " " .. awesome.conffile },
@@ -103,35 +105,6 @@ mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
 -- Menubar configuration
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
 -- }}}
-
--- {{{ Wibar
--- Create a textclock widget
-mytextclock = wibox.widget.textclock("%H:%M", 60)
-
-
--- battery
-batwidget = wibox.widget.progressbar()
-batbox = wibox.layout.margin(
-    wibox.widget {{
-            max_value = 1,
-            widget = batwidget,
-            border_width = 1,
-            border_color = "#000000",
-            color = {
-                type = "linear",
-                from = {0, 0},
-                to = {0, 30},
-                stops = {{0, "#AECF96"}, {1, "#FF5656"}}
-            }
-        },
-        forced_height = 10,
-        forced_width = 8,
-        direction = 'east',
-        color = beautiful.fg_widget,
-        layout = wibox.container.rotate
-    },
-    1, 1, 3, 3
-)
 
 -- cpu
 cpuwidget = awful.widget.graph()
@@ -204,7 +177,7 @@ awful.screen.connect_for_each_screen(function(s)
     set_wallpaper(s)
 
     -- Each screen has its own tag table.
-    awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
+    awful.tag({ "1", "2", "3", "4" }, s, awful.layout.layouts[1])
 
     -- Create a promptbox for each screen
     s.mypromptbox = awful.widget.prompt()
@@ -238,7 +211,7 @@ awful.screen.connect_for_each_screen(function(s)
         layout = wibox.layout.align.horizontal,
         { -- Left widgets
             layout = wibox.layout.fixed.horizontal,
-            mylauncher,
+            --mylauncher,
             s.mytaglist,
             s.mypromptbox,
         },
@@ -248,8 +221,14 @@ awful.screen.connect_for_each_screen(function(s)
             -- mykeyboardlayout,
             wibox.widget.systray(),
             cpuwidget,
-            batbox,
+            spacer,
+            volumearc_widget,
+            spacer,
+            baticon,
+            batpct,
+            spacer,
             mytextclock,
+            spacer,
             s.mylayoutbox,
         },
     }
@@ -363,7 +342,9 @@ globalkeys = gears.table.join(
               {description = "lua execute prompt", group = "awesome"}),
     -- Menubar
     awful.key({ modkey }, "p", function() menubar.show() end,
-              {description = "show the menubar", group = "launcher"})
+              {description = "show the menubar", group = "launcher"}),
+    -- lock
+    awful.key({ modkey }, "z", lock, { description = "lock screen", group = "awesome" })
 )
 
 clientkeys = gears.table.join(
@@ -527,7 +508,7 @@ awful.rules.rules = {
 
     -- Add titlebars to normal clients and dialogs
     { rule_any = {type = { "normal", "dialog" }
-      }, properties = { titlebars_enabled = true }
+      }, properties = { titlebars_enabled = false }
     },
 
     -- Set Firefox to always map on the tag named "2" on screen 1.
@@ -598,6 +579,5 @@ end)
 
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
-vicious.register(batwidget, vicious.widgets.bat, "$2", 61, "BAT0")
 vicious.register(cpuwidget, vicious.widgets.cpu, "$1", 3)
 -- }}}
